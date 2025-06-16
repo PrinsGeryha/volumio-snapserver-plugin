@@ -17,7 +17,7 @@ if [ ! -f $INSTALLING ]; then
 	echo "CPU architecture: " $ARCH
 	echo "Debian version: " $DEBIAN_VERSION
 
-	# Download latest SnapCast server package
+	# Download SnapCast server package
 	mkdir /home/volumio/snapserver
 
 	if [ $ARCH = "armhf" ] ; then
@@ -25,8 +25,8 @@ if [ ! -f $INSTALLING ]; then
 			echo "Defaulting to known working version of SnapCast components (0.15.0-armhf)"
 			cp -f /data/plugins/audio_interface/snapserver/binaries/snapserver_0.15.0_armhf.deb /home/volumio/snapserver
 		else
-			echo "Fetching latest releases of SnapCast components..."
-			wget $(curl -s https://api.github.com/repos/badaix/snapcast/releases/latest | grep 'armhf' | grep 'server' | cut -d\" -f4) -P /home/volumio/snapserver
+			echo "Downloading SnapCast v0.15.0 (armhf)..."
+			wget -O /home/volumio/snapserver/snapserver_0.15.0_armhf.deb https://github.com/badaix/snapcast/releases/download/v0.15.0/snapserver_0.15.0_armhf.deb
 			SNAPCONF="YES"
 		fi
 	elif [ $ARCH = "i386" ] || [ $ARCH = "i486" ] || [ $ARCH = "i586" ] || [ $ARCH = "i686" ] || [ $ARCH = "i786" ]; then
@@ -36,8 +36,9 @@ if [ ! -f $INSTALLING ]; then
 			echo "Defaulting to known working version of SnapCast components (0.15.0-amd64)"
 			cp -f /data/plugins/audio_interface/snapserver/binaries/snapserver_0.15.0_amd64.deb /home/volumio/snapserver			
 		else
-			echo "Fetching latest releases of SnapCast components..."
-			wget $(curl -s https://api.github.com/repos/badaix/snapcast/releases/latest | grep 'amd64' | grep 'server' | cut -d\" -f4) -P /home/volumio/snapserver
+			echo "Downloading SnapCast v0.15.0 (amd64)..."
+			wget -O /home/volumio/snapserver/snapserver_0.15.0_amd64.deb https://github.com/badaix/snapcast/releases/download/v0.15.0/snapserver_0.15.0_amd64.deb
+			SNAPCONF="YES"
 		fi
 	else 
 		echo "This architecture is not yet supported, you must build the snap*-packages yourself. Detected architecture: " $ARCH
@@ -50,6 +51,9 @@ if [ ! -f $INSTALLING ]; then
 	for f in /home/volumio/snapserver/snap*.deb; do dpkg -i "$f"; done
 	apt-get update && apt-get -f -y install
 	
+	# Lock snapserver to prevent upgrade
+	apt-mark hold snapserver || true
+
 	# Link to administrative tools; enables the global CLI command
 	ln -fs /usr/bin/snapserver /usr/sbin/snapserver	
 
