@@ -47,11 +47,13 @@ if [ ! -f $INSTALLING ]; then
 	# Backup old snap* installations (if any)
 	mv /usr/sbin/snapserver /usr/sbin/snapserver.bak
 
-	# Install packages (server and client) and dependencies
-	for f in /home/volumio/snapserver/snap*.deb; do dpkg -i "$f"; done
+	# Install packages (server and client) and dependencies with force for conf files
+	for f in /home/volumio/snapserver/snap*.deb; do
+		dpkg --force-confnew -i "$f"
+	done
 	apt-get update && apt-get -f -y install
-	
-	# Lock snapserver to prevent upgrade
+
+	# Lock snapserver version to prevent upgrades
 	apt-mark hold snapserver || true
 
 	# Link to administrative tools; enables the global CLI command
